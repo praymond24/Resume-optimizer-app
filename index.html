@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Optimizer - AI-Powered Job Matching</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151b3d;
+            --bg-tertiary: #1e2749;
+            --accent-primary: #00d4ff;
+            --accent-secondary: #7c3aed;
+            --accent-gradient: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #2d3a5f;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .background-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            font-weight: 400;
+        }
+
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .step-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .step-card:nth-child(1) { animation-delay: 0.1s; }
+        .step-card:nth-child(2) { animation-delay: 0.2s; }
+        .step-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .step-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+        }
+
+        .step-card:hover::before {
+            opacity: 1;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--accent-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 1rem;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .file-upload {
+            position: relative;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--bg-tertiary);
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent-primary);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+        }
+
+        .file-upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .file-upload-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            color: var(--accent-primary);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-family: 'DM Sans', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            margin-top: 3rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .result-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .copy-btn {
+            background: var(--bg-tertiary);
+            color: var(--accent-primary);
+            border: 1px solid var(--accent-primary);
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .result-content {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.8;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .result-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .result-content::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .result-content::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--error);
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .divider {
+            margin: 1rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .workflow {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <div class="container">
+        <header>
+            <h1>Resume Optimizer</h1>
+            <p class="subtitle">AI-powered resume tailoring for your dream job</p>
+        </header>
+
+        <div class="workflow">
+            <!-- Step 1: Resume Input -->
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h2 class="step-title">Your Resume</h2>
+                
+                <div class="input-group">
+                    <div class="file-upload" id="resumeFileUpload">
+                        <input type="file" id="resumeFile" accept=".txt,.pdf,.doc,.docx">
+                        <div class="file-upload-icon">📄</div>
+                        <div class="file-upload-text">Click to upload or drag resume file</div>
+                        <div class="file-name" id="resumeFileName"></div>
+                    </div>
+                </div>
+
+                <div class="divider">OR</div>
+
+                <div class="input-group">
+                    <label for="resumeText">Paste Resume Text</label>
+                    <textarea 
+                        id="resumeText" 
+                        placeholder="Paste your current resume here...&#10;&#10;Example:&#10;John Doe&#10;Software Engineer&#10;&#10;Experience:&#10;- Senior Developer at Tech Co (2020-Present)&#10;- Built scalable web applications..."
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Step 2: Job Description -->
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h2 class="step-title">Job Description</h2>
+                
+                <div class="input-group">
+                    <div class="file-upload" id="jobFileUpload">
+                        <input type="file" id="jobFile" accept=".txt,.pdf,.doc,.docx">
+                        <div class="file-upload-icon">💼</div>
+                        <div class="file-upload-text">Click to upload or drag job description</div>
+                        <div class="file-name" id="jobFileName"></div>
+                    </div>
+                </div>
+
+                <div class="divider">OR</div>
+
+                <div class="input-group">
+                    <label for="jobText">Paste Job Description</label>
+                    <textarea 
+                        id="jobText" 
+                        placeholder="Paste the job description here...&#10;&#10;Example:&#10;We're looking for a Senior Full-Stack Developer with:&#10;- 5+ years experience with React and Node.js&#10;- Strong understanding of cloud platforms..."
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Step 3: Optimize -->
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h2 class="step-title">Optimize & Generate</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.875rem;">
+                    Click below to analyze the job description and generate an optimized version of your resume tailored to match the position requirements.
+                </p>
+                <button class="btn" id="optimizeBtn" onclick="optimizeResume()">
+                    Generate Optimized Resume
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="result-section" id="resultSection">
+            <div class="result-card">
+                <div class="result-header">
+                    <h2 class="result-title">Your Optimized Resume</h2>
+                    <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
+                </div>
+                <div class="result-content" id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let resumeContent = '';
+        let jobContent = '';
+
+        // File upload handlers
+        document.getElementById('resumeFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('resumeFileName').textContent = file.name;
+                resumeContent = await readFile(file);
+                document.getElementById('resumeText').value = resumeContent;
+            }
+        });
+
+        document.getElementById('jobFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('jobFileName').textContent = file.name;
+                jobContent = await readFile(file);
+                document.getElementById('jobText').value = jobContent;
+            }
+        });
+
+        // Drag and drop handlers
+        ['resumeFileUpload', 'jobFileUpload'].forEach(id => {
+            const element = document.getElementById(id);
+            element.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                element.style.borderColor = 'var(--accent-primary)';
+            });
+            element.addEventListener('dragleave', () => {
+                element.style.borderColor = 'var(--border-color)';
+            });
+            element.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                element.style.borderColor = 'var(--border-color)';
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    const input = element.querySelector('input[type="file"]');
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    input.files = dataTransfer.files;
+                    input.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        // Text area handlers
+        document.getElementById('resumeText').addEventListener('input', (e) => {
+            resumeContent = e.target.value;
+        });
+
+        document.getElementById('jobText').addEventListener('input', (e) => {
+            jobContent = e.target.value;
+        });
+
+        async function readFile(file) {
+            if (file.type === 'application/pdf') {
+                const arrayBuffer = await file.arrayBuffer();
+                const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+                return { type: 'pdf', data: base64, name: file.name };
+            } else {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsText(file);
+                });
+            }
+        }
+
+        async function optimizeResume() {
+            const resume = document.getElementById('resumeText').value || resumeContent;
+            const job = document.getElementById('jobText').value || jobContent;
+
+            if (!resume || !job) {
+                alert('Please provide both your resume and the job description.');
+                return;
+            }
+
+            const btn = document.getElementById('optimizeBtn');
+            btn.disabled = true;
+            btn.textContent = 'Analyzing...';
+
+            const resultSection = document.getElementById('resultSection');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultSection.style.display = 'block';
+            resultContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">AI is analyzing your resume and the job description...</div>
+                </div>
+            `;
+            resultSection.classList.add('visible');
+
+            try {
+                // Prepare the messages
+                let messages = [
+                    {
+                        role: "user",
+                        content: []
+                    }
+                ];
+
+                // Handle resume content (could be text or PDF)
+                if (typeof resume === 'object' && resume.type === 'pdf') {
+                    messages[0].content.push({
+                        type: "document",
+                        source: {
+                            type: "base64",
+                            media_type: "application/pdf",
+                            data: resume.data
+                        }
+                    });
+                    messages[0].content.push({
+                        type: "text",
+                        text: "This is my current resume."
+                    });
+                } else {
+                    messages[0].content.push({
+                        type: "text",
+                        text: `Here is my current resume:\n\n${resume}`
+                    });
+                }
+
+                // Handle job description (could be text or PDF)
+                if (typeof job === 'object' && job.type === 'pdf') {
+                    messages[0].content.push({
+                        type: "document",
+                        source: {
+                            type: "base64",
+                            media_type: "application/pdf",
+                            data: job.data
+                        }
+                    });
+                    messages[0].content.push({
+                        type: "text",
+                        text: "This is the job description I'm applying for."
+                    });
+                } else {
+                    messages[0].content.push({
+                        type: "text",
+                        text: `\n\nHere is the job description I'm applying for:\n\n${job}`
+                    });
+                }
+
+                // Add the optimization instruction
+                messages[0].content.push({
+                    type: "text",
+                    text: `\n\nPlease analyze the job description and optimize my resume to better match the position. Focus on:
+1. Highlighting relevant skills and experiences that match the job requirements
+2. Using keywords from the job description naturally
+3. Restructuring bullet points to emphasize relevant accomplishments
+4. Maintaining truthfulness - don't add experiences I don't have
+5. Keeping the same general format and structure
+
+Please provide the complete optimized resume text that I can copy and paste directly.`
+                });
+
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 4000,
+                        messages: messages
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const optimizedResume = data.content
+                    .filter(item => item.type === "text")
+                    .map(item => item.text)
+                    .join("\n\n");
+
+                resultContent.textContent = optimizedResume;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultContent.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                        <br><br>
+                        Please try again or check your inputs.
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate Optimized Resume';
+            }
+        }
+
+        async function copyToClipboard() {
+            const content = document.getElementById('resultContent').textContent;
+            try {
+                await navigator.clipboard.writeText(content);
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied! ✓';
+                btn.style.background = 'var(--success)';
+                btn.style.color = 'white';
+                btn.style.borderColor = 'var(--success)';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }, 2000);
+            } catch (err) {
+                alert('Failed to copy to clipboard. Please select and copy manually.');
+            }
+        }
+    </script>
+</body>
+</html>
